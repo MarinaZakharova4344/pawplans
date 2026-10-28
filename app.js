@@ -373,13 +373,11 @@
     if (Math.abs(dx) > w * 0.25 || fast) go(dx < 0 ? 1 : -1, dx);
     else snapBack();
   }
-  ['month-view', 'day-view'].forEach(function (id) {
-    var el = $(id);
-    el.addEventListener('touchstart', onTouchStart, { passive: true });
-    el.addEventListener('touchmove', onTouchMove, { passive: true });
-    el.addEventListener('touchend', onTouchEnd, { passive: true });
-    el.addEventListener('touchcancel', function () { if (drag && drag.active) snapBack(); drag = null; }, { passive: true });
-  });
+  // свайп ловим на всём экране, а не только над планами или клетками календаря
+  document.addEventListener('touchstart', function (e) { if (!e.target.closest('#modal')) onTouchStart(e); else drag = null; }, { passive: true });
+  document.addEventListener('touchmove', onTouchMove, { passive: true });
+  document.addEventListener('touchend', onTouchEnd, { passive: true });
+  document.addEventListener('touchcancel', function () { if (drag && drag.active) snapBack(); drag = null; }, { passive: true });
   // после перетаскивания палец «нажимает» на то, где остановился — этот клик не нужен
   document.addEventListener('click', function (e) {
     if (dragged) { e.stopPropagation(); e.preventDefault(); dragged = false; }
