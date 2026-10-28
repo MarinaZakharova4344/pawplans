@@ -182,3 +182,8 @@ body.modal-open { overflow: hidden; }
 /* поля ввода всегда 16px и без автоподстройки размера текста: тогда iPhone не приближает страницу при фокусе */
 input, select, textarea { font-size: 16px !important; }
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
+/* нижняя панель общая для календаря и экрана дня; на экране дня оставляем под неё место */
+body.day-mode #app { padding-bottom: calc(90px + env(safe-area-inset-bottom)); }
+.screen { touch-action: pan-y; }
+#month-view, #day-view { will-change: auto; }

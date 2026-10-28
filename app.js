@@ -214,6 +214,8 @@
     $('month-view').hidden = true;
     $('day-view').hidden = false;
     document.body.classList.remove('no-scroll');
+    document.body.classList.add('day-mode');
+    $('prev-month').disabled = false; $('next-month').disabled = false;
     // экран сегодняшнего дня заливается тем же розовым, что и его клетка в календаре
     document.body.classList.toggle('day-today', dayKey === key(new Date()));
     renderDay();
@@ -224,7 +226,7 @@
     var k = currentDay;
     currentDay = null;
     $('day-view').hidden = true;
-    document.body.classList.remove('day-today');
+    document.body.classList.remove('day-today', 'day-mode');
     $('month-view').hidden = false;
     var cell = document.querySelector('.day[data-date="' + k + '"]');
     showMonth(Array.prototype.indexOf.call(months, cell.closest('.month')));
@@ -295,32 +297,99 @@
 
   $('back-btn').onclick = showMonths;
 
-  // перемотка месяцев: стрелки на нижней панели и на клавиатуре
-  function gotoMonth(step) { showMonth(curIndex + step); }
-  $('prev-month').onclick = function () { gotoMonth(-1); };
-  $('next-month').onclick = function () { gotoMonth(1); };
+  /* ---------- листание: нижняя панель, свайп пальцем и клавиатура ----------
+     В календаре переключаются месяцы, на экране дня — дни; экран уезжает целиком, нижняя панель остаётся. */
+  function activeView() { return currentDay ? $('day-view') : $('month-view'); }
 
-  // листание дней: свайп влево/вправо и стрелки на клавиатуре
-  var touch = null;
-  $('day-view').addEventListener('touchstart', function (e) {
-    touch = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-  }, { passive: true });
-  $('day-view').addEventListener('touchend', function (e) {
-    if (!touch) return;
-    var dx = e.changedTouches[0].clientX - touch.x, dy = e.changedTouches[0].clientY - touch.y;
-    touch = null;
-    if (Math.abs(dx) > 70 && Math.abs(dy) < 50) shiftDay(dx < 0 ? 1 : -1);
-  }, { passive: true });
+  function canGo(dir) {
+    if (currentDay) return true;
+    return dir < 0 ? curIndex > 0 : curIndex < months.length - 1;
+  }
+  function applyStep(dir) { if (currentDay) shiftDay(dir); else showMonth(curIndex + dir); }
+
+  var busy = false;
+  function animateTo(el, x, ms) {
+    el.style.transition = 'transform ' + ms + 'ms ease-out';
+    el.style.transform = 'translateX(' + x + 'px)';
+    return new Promise(function (res) { setTimeout(res, ms + 20); });
+  }
+
+  // dir: +1 — вперёд (следующий месяц/день), -1 — назад; from — откуда продолжить, если экран уже тянули пальцем
+  function go(dir, from) {
+    if (busy || !canGo(dir)) { snapBack(); return; }
+    busy = true;
+    var el = activeView(), w = window.innerWidth;
+    el.style.willChange = 'transform';
+    el.style.transition = 'none'; el.style.transform = 'translateX(' + (from || 0) + 'px)';
+    el.offsetWidth;
+    animateTo(el, -dir * w, 170).then(function () {
+      applyStep(dir);
+      var el2 = activeView();                              // тот же экран (месяц→месяц, день→день)
+      el2.style.transition = 'none'; el2.style.transform = 'translateX(' + (dir * w) + 'px)';
+      el2.offsetWidth;
+      return animateTo(el2, 0, 200).then(function () {
+        el2.style.transition = ''; el2.style.transform = ''; el2.style.willChange = '';
+        busy = false;
+      });
+    });
+  }
+  function snapBack() {
+    var el = activeView();
+    animateTo(el, 0, 160).then(function () { el.style.transition = ''; el.style.transform = ''; });
+  }
+
+  $('prev-month').onclick = function () { go(-1); };
+  $('next-month').onclick = function () { go(1); };
+
+  // свайп: экран едет за пальцем; отпустили далеко или резко — переключается, иначе возвращается
+  var drag = null, dragged = false;
+  function onTouchStart(e) {
+    if (busy || !$('modal').hidden || e.touches.length !== 1) { drag = null; return; }
+    dragged = false;
+    drag = { x: e.touches[0].clientX, y: e.touches[0].clientY, t: Date.now(), dx: 0, active: false };
+  }
+  function onTouchMove(e) {
+    if (!drag) return;
+    var dx = e.touches[0].clientX - drag.x, dy = e.touches[0].clientY - drag.y;
+    if (!drag.active) {
+      if (Math.abs(dx) < 12 || Math.abs(dx) < Math.abs(dy) * 1.3) {
+        if (Math.abs(dy) > 12) drag = null;                // вертикальная прокрутка — не наша
+        return;
+      }
+      drag.active = true; dragged = true;
+    }
+    drag.dx = dx;
+    var dir = dx < 0 ? 1 : -1, resist = canGo(dir) ? 1 : 0.25;   // на первом/последнем месяце экран «упирается»
+    var el = activeView();
+    el.style.transition = 'none';
+    el.style.transform = 'translateX(' + (dx * resist) + 'px)';
+  }
+  function onTouchEnd() {
+    if (!drag || !drag.active) { drag = null; return; }
+    var dx = drag.dx, dt = Date.now() - drag.t, w = window.innerWidth;
+    var fast = Math.abs(dx) > 30 && Math.abs(dx) / dt > 0.5;
+    drag = null;
+    setTimeout(function () { dragged = false; }, 350);      // «лишний» клик после свайпа приходит сразу; потом флаг сбрасываем
+    if (Math.abs(dx) > w * 0.25 || fast) go(dx < 0 ? 1 : -1, dx);
+    else snapBack();
+  }
+  ['month-view', 'day-view'].forEach(function (id) {
+    var el = $(id);
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchmove', onTouchMove, { passive: true });
+    el.addEventListener('touchend', onTouchEnd, { passive: true });
+    el.addEventListener('touchcancel', function () { if (drag && drag.active) snapBack(); drag = null; }, { passive: true });
+  });
+  // после перетаскивания палец «нажимает» на то, где остановился — этот клик не нужен
+  document.addEventListener('click', function (e) {
+    if (dragged) { e.stopPropagation(); e.preventDefault(); dragged = false; }
+  }, true);
+
   document.addEventListener('keydown', function (e) {
     if (!$('modal').hidden) { if (e.key === 'Escape') closeModal(); return; }
-    if (!currentDay) {
-      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); gotoMonth(-1); }
-      else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); gotoMonth(1); }
-      return;
-    }
-    if (e.key === 'ArrowLeft') shiftDay(-1);
-    else if (e.key === 'ArrowRight') shiftDay(1);
-    else if (e.key === 'Escape') showMonths();
+    if (e.key === 'ArrowLeft' || (!currentDay && e.key === 'ArrowUp')) { e.preventDefault(); go(-1); }
+    else if (e.key === 'ArrowRight' || (!currentDay && e.key === 'ArrowDown')) { e.preventDefault(); go(1); }
+    else if (e.key === 'Escape' && currentDay) showMonths();
   });
 
   $('planner').onclick = function (e) {
