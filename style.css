@@ -22,7 +22,7 @@ body {
 button { font: inherit; color: inherit; cursor: pointer; }
 [hidden] { display: none !important; }
 
-#app { max-width: 1000px; margin: 0 auto; min-height: 100vh; padding: 0 10px 110px; }
+#app { max-width: 1000px; margin: 0 auto; min-height: 0; padding: 0 10px 40px; }
 
 .top { display: flex; align-items: center; gap: 12px; padding: 16px 4px 10px; padding-top: calc(16px + env(safe-area-inset-top)); }
 .top h1 { margin: 0; font-size: 2rem; font-weight: 800; flex: 1; }
@@ -127,14 +127,15 @@ button.day.today, button.day.today:hover {
 .btn.danger { background: #fee2e2; color: #b91c1c; }
 
 @media (max-width: 640px) {
-  #app { padding: 0 6px 110px; }
+  #app { padding: 0 6px 40px; }
   .top h1 { font-size: 1.8rem; }
   .day { padding: 4px 2px; }
   .day .num { font-size: .85rem; min-width: 24px; height: 24px; padding: 0 2px; white-space: nowrap; }
   .chip { font-size: .62rem; padding: 2px 3px; text-align: center; }
   .hour-label { width: 54px; padding-left: 8px; }
-  .modal { align-items: flex-end; padding: 0; }
-  .sheet { max-width: none; border-radius: 20px 20px 0 0; padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
+  /* окно добавления сверху экрана: клавиатура его не закрывает, и iPhone не прокручивает страницу */
+  .modal { align-items: flex-start; padding: calc(env(safe-area-inset-top) + 12px) 12px 12px; }
+  .sheet { max-width: none; border-radius: 20px; }
 }
 
 /* в календаре страница не прокручивается: месяц целиком помещается на экране */
@@ -173,3 +174,7 @@ body.day-today, html:has(body.day-today) { background: #fbe7ef; }
 }
 /* поля ввода не меньше 16px, иначе iPhone приближает страницу при вводе; быстрые нажатия не масштабируют */
 button, input, .day { touch-action: manipulation; }
+
+/* страница не должна уезжать вбок или приближаться */
+html, body { overflow-x: hidden; max-width: 100%; }
+body.modal-open { overflow: hidden; }

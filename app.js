@@ -246,9 +246,27 @@
     $('f-end').value = t && t.end ? t.end : '';
     $('f-delete').hidden = !t;
     $('modal').hidden = false;
-    setTimeout(function () { $('f-title').focus(); }, 30);
+    document.body.classList.add('modal-open');
+    setTimeout(function () { $('f-title').focus({ preventScroll: true }); }, 30);
   }
-  function closeModal() { $('modal').hidden = true; editing = null; }
+  function closeModal() {
+    $('modal').hidden = true; editing = null;
+    document.body.classList.remove('modal-open');
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    resetView();
+  }
+
+  // после ввода iPhone может оставить страницу приближенной или прокрученной: возвращаем обычный вид
+  function resetView() {
+    var vp = document.querySelector('meta[name=viewport]');
+    if (vp) {
+      var base = vp.getAttribute('content');
+      vp.setAttribute('content', base + ', minimum-scale=1');
+      setTimeout(function () { vp.setAttribute('content', base); }, 60);
+    }
+    window.scrollTo(0, 0);
+    setTimeout(function () { window.scrollTo(0, 0); }, 120);
+  }
 
   /* ---------- События ---------- */
   $('weekdays').innerHTML = WEEKDAYS.map(function (w) { return '<div>' + w + '</div>'; }).join('');

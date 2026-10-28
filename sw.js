@@ -1,7 +1,7 @@
 /* Service worker Pawplans: приложение открывается и без интернета.
    Онлайн берём свежие файлы из сети и кладём копию в кэш, офлайн — отдаём из кэша.
    Если выкладываешь новую версию, поменяй номер в CACHE. */
-const CACHE = 'pawplans-v2';
+const CACHE = 'pawplans-v3';
 const FILES = [
   './', 'index.html', 'style.css', 'app.js', 'corgi.js', 'manifest.webmanifest',
   'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png',
