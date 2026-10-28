@@ -247,14 +247,31 @@
     $('f-delete').hidden = !t;
     $('modal').hidden = false;
     document.body.classList.add('modal-open');
+    fitModal();
     setTimeout(function () { $('f-title').focus({ preventScroll: true }); }, 30);
   }
   function closeModal() {
     $('modal').hidden = true; editing = null;
     document.body.classList.remove('modal-open');
+    ['top', 'left', 'width', 'height', 'right', 'bottom'].forEach(function (p) { $('modal').style[p] = ''; });
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
     resetView();
   }
+
+  // окно следует за видимой областью экрана (когда выезжает клавиатура), чтобы iPhone не сдвигал и не приближал страницу
+  function fitModal() {
+    var vv = window.visualViewport, m = $('modal');
+    if (!vv || m.hidden) return;
+    m.style.top = vv.offsetTop + 'px'; m.style.left = vv.offsetLeft + 'px';
+    m.style.width = vv.width + 'px'; m.style.height = vv.height + 'px';
+    m.style.right = 'auto'; m.style.bottom = 'auto';
+  }
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', fitModal);
+    window.visualViewport.addEventListener('scroll', fitModal);
+  }
+  // когда уходим из поля (в том числе из полей времени), приближение сбрасывается
+  $('modal').addEventListener('focusout', function () { setTimeout(function () { if (!$('modal').hidden) resetView(); }, 80); });
 
   // после ввода iPhone может оставить страницу приближенной или прокрученной: возвращаем обычный вид
   function resetView() {

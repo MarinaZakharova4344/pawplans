@@ -116,7 +116,7 @@ button.day.today, button.day.today:hover {
 .sheet { background: #fff; border-radius: 20px; padding: 20px; width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 14px; }
 .sheet h2 { margin: 0; }
 .sheet label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; font-size: .9rem; color: var(--muted); flex: 1; }
-.sheet input { font: inherit; font-size: 16px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; color: var(--text); background: var(--card); }
+.sheet input { font: inherit; font-size: 16px !important; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; color: var(--text); background: var(--card); }
 .sheet input:focus { outline: 2px solid var(--accent); }
 .row { display: flex; gap: 10px; }
 .actions { display: flex; gap: 8px; align-items: center; }
@@ -178,3 +178,7 @@ button, input, .day { touch-action: manipulation; }
 /* страница не должна уезжать вбок или приближаться */
 html, body { overflow-x: hidden; max-width: 100%; }
 body.modal-open { overflow: hidden; }
+
+/* поля ввода всегда 16px и без автоподстройки размера текста: тогда iPhone не приближает страницу при фокусе */
+input, select, textarea { font-size: 16px !important; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
