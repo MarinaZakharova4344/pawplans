@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>Pawplans</title>
+<meta name="apple-mobile-web-app-title" content="Pawplans">
+<meta name="application-name" content="Pawplans">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <!-- Экран месяцев: один длинный список недель, листается вверх/вниз -->
+  <section id="month-view" class="screen">
+    <div class="sticky" id="sticky">
+      <header class="top">
+        <h1 id="month-title"><span id="title-text"></span><canvas id="title-canvas" aria-hidden="true"></canvas></h1>
+        <div class="corgi-lane" id="corgi-lane"></div>
+      </header>
+      <div class="weekdays" id="weekdays"></div>
+    </div>
+    <div class="days" id="days"></div>
+    <nav class="bottom-bar" id="bottom-bar">
+      <button class="bar-btn left" id="prev-month" aria-label="Предыдущий месяц"></button>
+      <button class="bar-btn right" id="next-month" aria-label="Следующий месяц"></button>
+    </nav>
+  </section>
+
+  <!-- Экран дня -->
+  <section id="day-view" class="screen" hidden>
+    <header class="top">
+      <button class="icon-btn" id="back-btn" aria-label="Назад к календарю">‹</button>
+      <div class="day-title">
+        <h1 id="day-title"></h1>
+        <span id="day-sub"></span>
+      </div>
+    </header>
+    <div class="progress-wrap">
+      <div class="progress"><div id="progress-bar"></div></div>
+      <span id="progress-text"></span>
+    </div>
+    <div class="planner" id="planner"></div>
+  </section>
+
+</div>
+
+<!-- Окно добавления / редактирования -->
+<div class="modal" id="modal" hidden>
+  <form class="sheet" id="task-form">
+    <h2 id="modal-title">Новое дело</h2>
+    <label>Что делаем
+      <input type="text" id="f-title" maxlength="80" required placeholder="Например: встреча, спорт, учёба">
+    </label>
+    <div class="row">
+      <label>Начало
+        <input type="time" id="f-start" required>
+      </label>
+      <label>Конец
+        <input type="time" id="f-end">
+      </label>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn danger" id="f-delete" hidden>Удалить</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn ghost" id="f-cancel">Отмена</button>
+      <button type="submit" class="btn primary">Сохранить</button>
+    </div>
+  </form>
+</div>
+<script src="app.js"></script>
+<script src="corgi.js"></script>
+</body>
+</html>

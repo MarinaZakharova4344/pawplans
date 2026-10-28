@@ -1,0 +1,168 @@
+:root {
+  --bg: #ffffff;
+  --card: #f3f3f6;
+  --card-weekend: #e9e9ee;
+  --line: #d9d9e0;
+  --chip: #d2d2da;
+  --text: #1c1c1e;
+  --muted: #666670;
+  --accent: #0d0d0f;
+  --accent-soft: #26262b;
+  --soft-pink: #f4c6d6;
+  --row: clamp(84px, calc((100vh - 200px) / 5), 130px);
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 16px;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+[hidden] { display: none !important; }
+
+#app { max-width: 1000px; margin: 0 auto; min-height: 100vh; padding: 0 10px 110px; }
+
+.top { display: flex; align-items: center; gap: 12px; padding: 16px 4px 10px; padding-top: calc(16px + env(safe-area-inset-top)); }
+.top h1 { margin: 0; font-size: 2rem; font-weight: 800; flex: 1; }
+.icon-btn {
+  border: 0; background: var(--card); color: var(--text);
+  width: 42px; height: 42px; border-radius: 21px; font-weight: 700; font-size: 1.5rem; line-height: 1; padding: 0 0 3px;
+}
+.icon-btn:hover { background: var(--line); }
+
+/* Календарь: непрерывные недели */
+.sticky { position: sticky; top: 0; z-index: 5; background: var(--bg); }
+.weekdays, .grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+.weekdays { background: var(--card); border-radius: 20px 20px 0 0; border-bottom: 3px solid #3c3c43; }
+.weekdays div { text-align: center; padding: 10px 0; font-weight: 600; color: var(--muted); font-size: .9rem; }
+.weekdays div:nth-child(n+6) { background: var(--card-weekend); }
+.weekdays div:last-child { border-top-right-radius: 20px; }
+/* один месяц = один экран: следующий месяц снизу не виден, под карточкой пустая полоса */
+/* виден только выбранный месяц */
+.month { display: none; padding-bottom: 6px; }
+.month.active { display: block; }
+.grid { grid-auto-rows: var(--row); background: var(--card); border-radius: 0 0 18px 18px; overflow: hidden; }
+.day {
+  height: var(--row); padding: 6px 3px; border: 0; border-top: 1px solid var(--line);
+  background: transparent; text-align: left; display: flex; flex-direction: column; gap: 3px; overflow: hidden; align-items: stretch;
+}
+.day:nth-child(-n+7) { border-top: 0; }
+.day.empty { border-top: 0; }
+.day:nth-child(7n+6), .day:nth-child(7n) { background: var(--card-weekend); }
+button.day:hover { background: var(--line); }
+
+/* пиксельный корги бегает по верхней рамке календаря (corgi.js) */
+.top { position: relative; }
+.corgi-lane { position: absolute; left: 0; right: 0; bottom: 0; height: 60px; pointer-events: none; z-index: 2; }
+.corgi-sprite { position: absolute; left: 0; bottom: 0; image-rendering: pixelated; }
+/* сегодняшний день: прямоугольная нежно-розовая заливка на всю клетку, без скруглений, контура и тени,
+   чтобы линии между неделями шли непрерывно; внутри число и стрелка вниз, открывающая экран дня */
+button.day.today, button.day.today:hover {
+  background: var(--soft-pink); border-radius: 0; margin: 0; height: var(--row); box-shadow: none;
+}
+.day.today .chip { white-space: normal; overflow-wrap: anywhere; line-height: 1.15; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.expand { position: relative; align-self: center; margin: auto 0; flex: none; width: 44px; height: 34px; }
+.expand::before {
+  content: ""; position: absolute; left: 50%; top: 5px; width: 14px; height: 14px;
+  border-right: 4px solid #3c3c43; border-bottom: 4px solid #3c3c43; border-radius: 2px;
+  transform: translateX(-50%) rotate(45deg);
+}
+.day .num { font-weight: 700; font-size: 1rem; align-self: center; min-width: 28px; height: 28px; padding: 0 6px; display: grid; place-items: center; border-radius: 14px; flex: none; }
+.day.first .num { color: var(--accent); }
+.chip {
+  display: block; font-size: .72rem; font-weight: 600; padding: 3px 5px; border-radius: 6px; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: var(--chip); flex: none;
+}
+.chip.done { background: var(--accent-soft); color: #fff; }
+.more { font-size: .7rem; color: var(--muted); text-align: center; }
+
+/* День */
+.day-title { flex: 1; min-width: 0; }
+.day-title h1 { font-size: 1.5rem; }
+.day-title span { color: var(--muted); font-size: .95rem; text-transform: capitalize; }
+.progress-wrap { display: flex; align-items: center; gap: 12px; padding: 0 4px 14px; }
+.progress { flex: 1; height: 12px; background: #fff; border: 1.5px solid #3c3c43; border-radius: 7px; overflow: hidden; }
+.progress div { height: 100%; width: 0; background: #3c3c43; border-radius: 5px; transition: width .3s; }
+#progress-text { font-weight: 700; color: var(--text); font-size: .9rem; white-space: nowrap; }
+
+.planner { display: flex; flex-direction: column; gap: 10px; padding-top: 4px; }
+.task { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 14px; background: #fff; border: 2px solid #3c3c43; box-shadow: 0 5px 12px rgba(60, 60, 67, .22); cursor: pointer; }
+/* выполненное дело: просто зелёная галочка, без квадрата и без зачёркивания */
+.check { flex: none; position: relative; width: 30px; height: 30px; border-radius: 50%; border: 2px solid #8f8f9a; background: #fff; padding: 0; }
+.task.done .check::after {
+  content: ""; position: absolute; left: 50%; top: 44%; width: 8px; height: 14px;
+  border-right: 3.5px solid #e56b9a; border-bottom: 3.5px solid #e56b9a; border-radius: 1px;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.t-main { flex: 1; min-width: 0; }
+.t-title { font-weight: 600; overflow-wrap: anywhere; }
+.t-time { font-size: .78rem; color: var(--muted); }
+
+/* нижняя панель: влево — предыдущий месяц, вправо — следующий */
+.bottom-bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 6;
+  display: flex; justify-content: space-between; align-items: center;
+  height: calc(60px + env(safe-area-inset-bottom)); padding: 0 max(24px, calc(50% - 476px)) env(safe-area-inset-bottom);
+  background: #0d0d0f; box-shadow: 0 -4px 16px rgba(0, 0, 0, .35);
+}
+.bar-btn { position: relative; width: 64px; height: 44px; border: 0; background: transparent; padding: 0; border-radius: 12px; }
+.bar-btn:hover:not(:disabled) { background: rgba(255, 255, 255, .18); }
+.bar-btn:disabled { opacity: .35; cursor: default; }
+.bar-btn::before { content: ""; position: absolute; top: 50%; width: 16px; height: 16px; border: solid #fff; border-width: 0; border-radius: 2px; }
+.bar-btn.left::before { left: 50%; border-left-width: 5px; border-bottom-width: 5px; transform: translate(-30%, -50%) rotate(45deg); }
+.bar-btn.right::before { left: 50%; border-right-width: 5px; border-top-width: 5px; transform: translate(-70%, -50%) rotate(45deg); }
+
+/* Окно */
+.modal { position: fixed; inset: 0; background: rgba(0, 0, 0, .45); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 10; }
+.sheet { background: #fff; border-radius: 20px; padding: 20px; width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 14px; }
+.sheet h2 { margin: 0; }
+.sheet label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; font-size: .9rem; color: var(--muted); flex: 1; }
+.sheet input { font: inherit; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; color: var(--text); background: var(--card); }
+.sheet input:focus { outline: 2px solid var(--accent); }
+.row { display: flex; gap: 10px; }
+.actions { display: flex; gap: 8px; align-items: center; }
+.spacer { flex: 1; }
+.btn { border: 0; border-radius: 12px; padding: 11px 16px; font-weight: 700; }
+.btn.primary { background: var(--accent); color: #fff; }
+.btn.ghost { background: var(--card); color: var(--text); }
+.btn.danger { background: #fee2e2; color: #b91c1c; }
+
+@media (max-width: 640px) {
+  #app { padding: 0 6px 110px; }
+  .top h1 { font-size: 1.8rem; }
+  .day { padding: 4px 2px; }
+  .day .num { font-size: .85rem; min-width: 24px; height: 24px; padding: 0 2px; white-space: nowrap; }
+  .chip { font-size: .62rem; padding: 2px 3px; text-align: center; }
+  .hour-label { width: 54px; padding-left: 8px; }
+  .modal { align-items: flex-end; padding: 0; }
+  .sheet { max-width: none; border-radius: 20px 20px 0 0; padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
+}
+
+/* в календаре страница не прокручивается: месяц целиком помещается на экране */
+body.no-scroll, html:has(body.no-scroll) { overflow: hidden; height: 100%; }
+body.no-scroll #app { padding-bottom: 0; min-height: 0; }
+
+/* экран дня: список планов и кнопка «плюс» */
+.task { padding: 12px 14px; }
+.t-time { margin-top: 2px; color: #4a4a54; }
+.empty-day { margin: 18px 0 8px; text-align: center; color: var(--muted); }
+.add-plan {
+  display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; padding: 14px;
+  background: #2c2c33; border: 0; border-radius: 16px; font-weight: 700; color: #fff; font-size: 1.05rem;
+  box-shadow: 0 6px 14px rgba(44, 44, 51, .25);
+}
+.add-plan:hover { background: #3c3c43; }
+
+/* название месяца: текст остаётся в разметке (невидимый), а видимый вариант рисует canvas с розовыми «дырками» букв */
+.top h1 { position: relative; }
+#title-text { color: transparent; }
+#title-canvas { position: absolute; pointer-events: none; }
+
+/* кнопка «назад» на экране дня: чёрный контур */
+#back-btn { border: 2.5px solid #0d0d0f; background: #fff; }
+#back-btn:hover { background: var(--card); }
+
+/* экран сегодняшнего дня: розовый фон, как у выделенной клетки в календаре */
+body.day-today, html:has(body.day-today) { background: #fbe7ef; }
