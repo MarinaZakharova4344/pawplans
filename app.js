@@ -338,6 +338,12 @@
     window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
   }
 
+  // приложение живёт в памяти телефона днями: если дата сменилась, перезагружаем, чтобы «сегодня» обновилось
+  var builtDay = key(new Date());
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden && key(new Date()) !== builtDay) location.reload();
+  });
+
   buildGrid();
   var todayCell = document.querySelector('.day[data-date="' + key(new Date()) + '"]');
   showMonth(Array.prototype.indexOf.call(months, todayCell.closest('.month')));

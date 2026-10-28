@@ -30,7 +30,6 @@ button { font: inherit; color: inherit; cursor: pointer; }
   border: 0; background: var(--card); color: var(--text);
   width: 42px; height: 42px; border-radius: 21px; font-weight: 700; font-size: 1.5rem; line-height: 1; padding: 0 0 3px;
 }
-.icon-btn:hover { background: var(--line); }
 
 /* Календарь: непрерывные недели */
 .sticky { position: sticky; top: 0; z-index: 5; background: var(--bg); }
@@ -51,7 +50,6 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .day:nth-child(-n+7) { border-top: 0; }
 .day.empty { border-top: 0; }
 .day:nth-child(7n+6), .day:nth-child(7n) { background: var(--card-weekend); }
-button.day:hover { background: var(--line); }
 
 /* пиксельный корги бегает по верхней рамке календаря (corgi.js) */
 .top { position: relative; }
@@ -108,7 +106,6 @@ button.day.today, button.day.today:hover {
   background: #0d0d0f; box-shadow: 0 -4px 16px rgba(0, 0, 0, .35);
 }
 .bar-btn { position: relative; width: 64px; height: 44px; border: 0; background: transparent; padding: 0; border-radius: 12px; }
-.bar-btn:hover:not(:disabled) { background: rgba(255, 255, 255, .18); }
 .bar-btn:disabled { opacity: .35; cursor: default; }
 .bar-btn::before { content: ""; position: absolute; top: 50%; width: 16px; height: 16px; border: solid #fff; border-width: 0; border-radius: 2px; }
 .bar-btn.left::before { left: 50%; border-left-width: 5px; border-bottom-width: 5px; transform: translate(-30%, -50%) rotate(45deg); }
@@ -119,7 +116,7 @@ button.day.today, button.day.today:hover {
 .sheet { background: #fff; border-radius: 20px; padding: 20px; width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 14px; }
 .sheet h2 { margin: 0; }
 .sheet label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; font-size: .9rem; color: var(--muted); flex: 1; }
-.sheet input { font: inherit; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; color: var(--text); background: var(--card); }
+.sheet input { font: inherit; font-size: 16px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; color: var(--text); background: var(--card); }
 .sheet input:focus { outline: 2px solid var(--accent); }
 .row { display: flex; gap: 10px; }
 .actions { display: flex; gap: 8px; align-items: center; }
@@ -153,7 +150,6 @@ body.no-scroll #app { padding-bottom: 0; min-height: 0; }
   background: #2c2c33; border: 0; border-radius: 16px; font-weight: 700; color: #fff; font-size: 1.05rem;
   box-shadow: 0 6px 14px rgba(44, 44, 51, .25);
 }
-.add-plan:hover { background: #3c3c43; }
 
 /* название месяца: текст остаётся в разметке (невидимый), а видимый вариант рисует canvas с розовыми «дырками» букв */
 .top h1 { position: relative; }
@@ -162,7 +158,18 @@ body.no-scroll #app { padding-bottom: 0; min-height: 0; }
 
 /* кнопка «назад» на экране дня: чёрный контур */
 #back-btn { border: 2.5px solid #0d0d0f; background: #fff; }
-#back-btn:hover { background: var(--card); }
 
 /* экран сегодняшнего дня: розовый фон, как у выделенной клетки в календаре */
 body.day-today, html:has(body.day-today) { background: #fbe7ef; }
+
+/* подсветка при наведении только там, где есть мышь: на телефоне после касания она «залипала» (например, серым на 30-м числе) */
+@media (hover: hover) {
+  .icon-btn:hover { background: var(--line); }
+  button.day:hover { background: var(--line); }
+  .bar-btn:hover:not(:disabled) { background: rgba(255, 255, 255, .18); }
+  .add-plan:hover { background: #3c3c43; }
+  #back-btn:hover { background: var(--card); }
+  button.day.today:hover { background: var(--soft-pink); }
+}
+/* поля ввода не меньше 16px, иначе iPhone приближает страницу при вводе; быстрые нажатия не масштабируют */
+button, input, .day { touch-action: manipulation; }
