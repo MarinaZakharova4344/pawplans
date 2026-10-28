@@ -250,7 +250,8 @@
     $('modal').hidden = false;
     document.body.classList.add('modal-open');
     fitModal();
-    setTimeout(function () { $('f-title').focus({ preventScroll: true }); }, 30);
+    // при добавлении фокус ставим сразу, в том же нажатии: только так iPhone сразу показывает клавиатуру
+    if (!id) $('f-title').focus({ preventScroll: true });
   }
   function closeModal() {
     $('modal').hidden = true; editing = null;

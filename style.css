@@ -190,3 +190,9 @@ html, body, .screen { touch-action: pan-y; }
 
 /* экран дня занимает всю высоту, чтобы листать можно было и над пустой частью внизу */
 body.day-mode #day-view { min-height: calc(100vh - 90px - env(safe-area-inset-bottom) - 20px); }
+
+/* кнопки окна: делят ширину поровну и никогда не выходят за края окна */
+.actions { display: flex; gap: 8px; align-items: stretch; width: 100%; }
+.actions .spacer { display: none; }
+.actions .btn { flex: 1 1 0; min-width: 0; padding: 12px 6px; white-space: nowrap; font-size: .95rem; text-align: center; }
+.sheet { overflow: hidden; }
